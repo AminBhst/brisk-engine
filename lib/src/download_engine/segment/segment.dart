@@ -4,7 +4,7 @@ class Segment {
 
   Segment(this.startByte, this.endByte);
 
-  get length => this.endByte - this.startByte + 1;
+  int get length => endByte - startByte + 1;
 
   @override
   String toString() {
@@ -12,22 +12,22 @@ class Segment {
   }
 
   bool isInRangeOfOther(Segment other) {
-    return this.startByte >= other.startByte && this.endByte <= other.endByte;
+    return startByte >= other.startByte && endByte <= other.endByte;
   }
 
   bool overlapsWithOther(Segment other) {
-    return this.startByte <= other.startByte && this.endByte >= other.startByte;
+    return startByte <= other.startByte && endByte >= other.startByte;
   }
 
   bool get isValid =>
-      this.startByte != this.endByte &&
-      this.startByte < this.endByte &&
-      this.startByte + 1 < this.endByte;
+      startByte != endByte &&
+      startByte < endByte &&
+      startByte + 1 < endByte;
 
   @override
   bool operator ==(Object other) {
     return (other is Segment) &&
-        other.startByte == this.startByte &&
-        other.endByte == this.endByte;
+        other.startByte == startByte &&
+        other.endByte == endByte;
   }
 }
