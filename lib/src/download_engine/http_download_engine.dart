@@ -152,7 +152,8 @@ class HttpDownloadEngine {
           .where((conn) =>
               (conn.resetCount < downloadSettings!.maxConnectionRetryCount ||
                   downloadSettings!.maxConnectionRetryCount == -1) &&
-              conn.lastResponseTime + downloadSettings!.connectionRetryTimeoutMillis <
+              conn.lastResponseTime +
+                      downloadSettings!.connectionRetryTimeoutMillis <
                   _nowMillis)
           .toList();
 
@@ -311,6 +312,13 @@ class HttpDownloadEngine {
     });
   }
 
+  static bool isDownloadNearCompletion(String downloadId) {
+    final estimate = _downloadProgresses[downloadId]?.estimatedRemaining ?? "";
+    return estimate.contains("Seconds") &&
+        !estimate.contains(",") &&
+        ((int.tryParse(estimate.replaceAll(" Seconds", "")) ?? 100) < 5);
+  }
+
   // TODO take estimation into account
   static bool _shouldCreateNewConnections(String downloadId) {
     final progress = _downloadProgresses[downloadId]!;
@@ -326,7 +334,8 @@ class HttpDownloadEngine {
             downloadSettings!.totalConnections &&
         engineChannel!.createdConnections <
             downloadSettings!.totalConnections &&
-        !_connectionSpawnerIgnoreList.contains(downloadId);
+        !_connectionSpawnerIgnoreList.contains(downloadId) &&
+        !isDownloadNearCompletion(downloadId);
   }
 
   /// Handles the messages coming from [BaseHttpDownloadConnection]
