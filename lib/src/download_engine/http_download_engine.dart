@@ -332,16 +332,16 @@ class HttpDownloadEngine {
   /// Handles the messages coming from [BaseHttpDownloadConnection]
   static void _handleConnectionMessages(message) async {
     switch (message.runtimeType) {
-      case DownloadProgressMessage _:
+      case const (DownloadProgressMessage):
         _handleProgressUpdates(message);
         break;
-      case ConnectionSegmentMessage _:
+      case const (ConnectionSegmentMessage):
         _handleSegmentMessage(message);
         break;
-      case ConnectionHandshake _:
+      case const (ConnectionHandshake):
         _handleConnectionHandshakeMessage(message);
         break;
-      case LogMessage _:
+      case const (LogMessage):
         _handleLogMessage(message);
         break;
       default:
