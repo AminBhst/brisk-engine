@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:brisk_engine/brisk_engine.dart';
 
 void main() async {
@@ -8,6 +10,15 @@ void main() async {
   String url =
       "https://github.com/AminBhst/brisk-engine/archive/refs/heads/main.zip";
   final downloadItem = await HttpDownloadEngine.buildDownloadItem(url);
+
+  final settings = DownloadSettings(
+    baseSaveDir: Directory("YOUR_BASE_DIRECTORY"),
+    totalConnections: 8,
+    loggerEnabled: false,
+    baseTempDir: Directory("YOUR_BASE_DIRECTORY"),
+    connectionRetryTimeoutMillis: 10000,
+    maxConnectionRetryCount: -1, // Currently doesn't work
+  );
 
   /// Start the engine
   DownloadEngine.start(
