@@ -778,7 +778,7 @@ class HttpDownloadEngine {
       }
       logger?.info("Building tree...");
       engineChannel.segmentTree = DownloadSegmentTree.buildFromMissingBytes(
-        data.downloadItem.contentLength,
+        data.downloadItem.fileSize,
         downloadSettings!.totalConnections,
         missingByteRanges,
       );
@@ -837,7 +837,7 @@ class HttpDownloadEngine {
   static List<Segment> _findMissingByteRanges(
     DownloadItemModel downloadItem,
   ) {
-    final contentLength = downloadItem.contentLength;
+    final contentLength = downloadItem.fileSize;
     List<File>? tempFiles;
     final tempDirPath = join(
       downloadSettings!.baseTempDir.path,
@@ -849,7 +849,7 @@ class HttpDownloadEngine {
     }
 
     if (tempFiles == null || tempFiles.isEmpty) {
-      return [Segment(0, downloadItem.contentLength)];
+      return [Segment(0, downloadItem.fileSize)];
     }
 
     tempFiles.sort(sortByByteRanges);
@@ -920,8 +920,8 @@ class HttpDownloadEngine {
         logger?.info("Found bad length :: ${basename(file.path)}");
         tempFilesToDelete.add(file);
       }
-      if (start > downloadItem.contentLength ||
-          end > downloadItem.contentLength) {
+      if (start > downloadItem.fileSize ||
+          end > downloadItem.fileSize) {
         logger?.info(
           "Found byte range exceeding contentLength :: ${basename(file.path)}",
         );
@@ -1021,7 +1021,7 @@ class HttpDownloadEngine {
       fileToWrite.writeAsBytesSync(bytes, mode: FileMode.writeOnlyAppend);
     }
     final assembleSuccessful =
-        fileToWrite.lengthSync() == downloadItem.contentLength;
+        fileToWrite.lengthSync() == downloadItem.fileSize;
     if (assembleSuccessful) {
       _connectionIsolates[downloadItem.uid]?.values.forEach((isolate) {
         isolate.kill();
@@ -1029,7 +1029,7 @@ class HttpDownloadEngine {
       tempDir.deleteSync(recursive: true);
     } else {
       logger?.error(
-        "Assemble failed! written file length = ${fileToWrite.lengthSync()} expected file length = ${downloadItem.contentLength}",
+        "Assemble failed! written file length = ${fileToWrite.lengthSync()} expected file length = ${downloadItem.fileSize}",
       );
     }
     if (notifyProgress) {
@@ -1087,7 +1087,7 @@ class HttpDownloadEngine {
         _tempTime + 1000 > nowMillis ||
         bytesTransferRate == 0) return;
     int totalBytes = 0;
-    final contentLength = progresses.values.first.downloadItem.contentLength;
+    final contentLength = progresses.values.first.downloadItem.fileSize;
     for (var element in progresses.values) {
       totalBytes += element.totalReceivedBytes;
     }
@@ -1252,7 +1252,7 @@ class HttpDownloadEngine {
   static bool isAssembledFileInvalid(DownloadItemModel downloadItem) {
     final assembledFile = File(downloadItem.filePath);
     return assembledFile.existsSync() &&
-        assembledFile.lengthSync() != downloadItem.contentLength;
+        assembledFile.lengthSync() != downloadItem.fileSize;
   }
 
   /// TODO should notify the progress while building the file instead of when the file has already been built
@@ -1281,6 +1281,8 @@ class HttpDownloadEngine {
       fileName: fileInfo.fileName,
       downloadUrl: downloadUrl,
       progress: 0,
+      fileSize: fileInfo.contentLength,
+      supportsPause: fileInfo.supportsPause,
     );
   }
 

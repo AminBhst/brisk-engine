@@ -253,17 +253,17 @@ abstract class BaseHttpDownloadConnection {
     totalConnectionWriteProgress = 1;
     connectionStatus = DownloadStatus.connectionComplete;
     final totalExistingLength = getTotalWrittenBytesLength();
-    totalDownloadProgress = totalExistingLength / downloadItem.contentLength;
+    totalDownloadProgress = totalExistingLength / downloadItem.fileSize;
   }
 
   void _updateDownloadProgress() {
     downloadProgress = totalRequestReceivedBytes / segment.length;
     totalDownloadProgress =
-        totalConnectionReceivedBytes / downloadItem.contentLength;
+        totalConnectionReceivedBytes / downloadItem.fileSize;
     if (downloadProgress > 1) {
       final excessBytes = totalConnectionReceivedBytes - segment.length;
       totalDownloadProgress = (totalConnectionReceivedBytes - excessBytes) /
-          downloadItem.contentLength;
+          downloadItem.fileSize;
     }
   }
 
@@ -342,7 +342,7 @@ abstract class BaseHttpDownloadConnection {
     totalRequestWrittenBytes = totalRequestReceivedBytes;
     totalConnectionWrittenBytes = totalExistingLength;
     totalDownloadProgress =
-        totalConnectionReceivedBytes / downloadItem.contentLength;
+        totalConnectionReceivedBytes / downloadItem.fileSize;
     logger?.info(
       "totalRequestReceivedBytes: $totalRequestReceivedBytes  "
       "totalConnectionReceivedBytes: $totalConnectionReceivedBytes "
@@ -410,7 +410,7 @@ abstract class BaseHttpDownloadConnection {
       _notifyProgress();
       return;
     }
-    if (receivedBytesMatchEndByte && endByte != downloadItem.contentLength) {
+    if (receivedBytesMatchEndByte && endByte != downloadItem.fileSize) {
       _onByteExactMatch();
       _notifyProgress();
       return;
@@ -426,12 +426,12 @@ abstract class BaseHttpDownloadConnection {
       "Received bytes match endByte! "
       "closing the connection and flushing the buffer...",
     );
-    if (this.endByte == downloadItem.contentLength) {
+    if (this.endByte == downloadItem.fileSize) {
       logger?.info("Connection corresponds to the last segment!");
       totalRequestReceivedBytes += 3;
       totalConnectionReceivedBytes += 3;
       totalDownloadProgress =
-          totalConnectionReceivedBytes / downloadItem.contentLength;
+          totalConnectionReceivedBytes / downloadItem.fileSize;
     }
     client.close();
     _flushBuffer();
@@ -464,7 +464,7 @@ abstract class BaseHttpDownloadConnection {
     final file = File(filePath)
       ..writeAsBytesSync(mode: FileMode.writeOnly, bytes);
 
-    if (tempFileStartByte > downloadItem.contentLength) {
+    if (tempFileStartByte > downloadItem.fileSize) {
       logger?.warn(
           "Attention:: Extremely Weird:: conn$connectionNumber::$segment "
           "byteExceed?$receivedBytesExceededEndByte "
@@ -484,7 +484,7 @@ abstract class BaseHttpDownloadConnection {
   void _onTempFileWriteComplete(File file) {
     totalRequestWrittenBytes += file.lengthSync();
     totalConnectionWriteProgress =
-        totalConnectionWrittenBytes / downloadItem.contentLength;
+        totalConnectionWrittenBytes / downloadItem.fileSize;
     totalRequestWriteProgress = totalRequestReceivedBytes / segment.length;
     if (totalRequestWriteProgress == 1) {
       connectionStatus = DownloadStatus.connectionComplete;
@@ -542,7 +542,7 @@ abstract class BaseHttpDownloadConnection {
       totalRequestWrittenBytes = segment.length;
     }
     totalDownloadProgress =
-        totalConnectionReceivedBytes / downloadItem.contentLength;
+        totalConnectionReceivedBytes / downloadItem.fileSize;
     logger?.info("TempFiles fix complete");
   }
 
@@ -564,8 +564,8 @@ abstract class BaseHttpDownloadConnection {
     if (tempFiles.length == 1) {
       final file = basename(tempFiles[0].path);
       final fileEndByte = getEndByteFromTempFileName(file);
-      if (endByte == downloadItem.contentLength &&
-          fileEndByte == downloadItem.contentLength - 1) {
+      if (endByte == downloadItem.fileSize &&
+          fileEndByte == downloadItem.fileSize - 1) {
         return true;
       }
       if (endByte != fileEndByte) {
@@ -588,8 +588,8 @@ abstract class BaseHttpDownloadConnection {
             "IsDownloadComplete::Found inconsistent ranges : ${basename(prevFile.path)} != ${basename(file.path)}");
       }
       if (isLastFile) {
-        if (endByte == downloadItem.contentLength &&
-            fileEndByte == downloadItem.contentLength - 1) {
+        if (endByte == downloadItem.fileSize &&
+            fileEndByte == downloadItem.fileSize - 1) {
           return true;
         }
         if (fileEndByte != endByte) {
@@ -750,7 +750,7 @@ abstract class BaseHttpDownloadConnection {
     bytesTransferRate = 0;
     downloadProgress = totalRequestReceivedBytes / segment.length;
     totalDownloadProgress =
-        totalConnectionReceivedBytes / downloadItem.contentLength;
+        totalConnectionReceivedBytes / downloadItem.fileSize;
     _flushBuffer();
     connectionStatus = DownloadStatus.connectionComplete;
     logger?.info("Download complete with completion signal");
@@ -805,8 +805,8 @@ abstract class BaseHttpDownloadConnection {
 
   bool isStartNotAllowed(bool connectionReset, bool connectionReuse) {
     if (startByte >= endByte ||
-        startByte > downloadItem.contentLength ||
-        endByte > downloadItem.contentLength) {
+        startByte > downloadItem.fileSize ||
+        endByte > downloadItem.fileSize) {
       logger?.warn("Invalid requested byte ranges $segment. Skipping...");
       return true;
     }

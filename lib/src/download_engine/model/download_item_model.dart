@@ -11,7 +11,7 @@ class DownloadItemModel {
 
   DateTime? startDate;
 
-  int contentLength;
+  int fileSize;
 
   DateTime? finishDate;
 
@@ -32,7 +32,7 @@ class DownloadItemModel {
     this.startDate,
     this.finishDate,
     required this.progress,
-    this.contentLength = 0,
+    this.fileSize = 0,
     this.fileType = "other",
     this.supportsPause = false,
     this.status = "In Queue",
