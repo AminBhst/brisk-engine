@@ -1,6 +1,6 @@
 name: brisk_engine
 description: Ultra-fast, highly efficient download engine written in pure dart
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/AminBhst/brisk-engine
 
 environment:
